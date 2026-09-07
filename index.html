@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Anónimo con Salas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Pantalla de inicio: Elegir entre crear o unirse -->
+        <div id="home-screen">
+            <h1>🔒 Chat Anónimo</h1>
+            <p>Únete a una sala o crea la tuya propia</p>
+            
+            <div class="home-options">
+                <!-- Opción 1: Crear sala -->
+                <div class="option-card" id="create-option">
+                    <h2>✨ Crear Sala</h2>
+                    <p>Inicia un nuevo chat y comparte el código</p>
+                    <input type="text" id="create-room-name" placeholder="Nombre de la sala" maxlength="30">
+                    <input type="text" id="create-username" placeholder="Tu nombre de usuario" maxlength="15">
+                    <button id="create-room-btn">Crear Sala</button>
+                </div>
+
+                <!-- Opción 2: Unirse a sala -->
+                <div class="option-card" id="join-option">
+                    <h2>🔑 Unirse a Sala</h2>
+                    <p>Ingresa el código de una sala existente</p>
+                    <input type="text" id="join-room-code" placeholder="Código (ej: ABC123)" maxlength="6" style="text-transform: uppercase;">
+                    <input type="text" id="join-username" placeholder="Tu nombre de usuario" maxlength="15">
+                    <button id="join-room-btn">Unirse</button>
+                </div>
+            </div>
+
+            <div id="error-message" style="color: #e94560; margin-top: 10px;"></div>
+        </div>
+
+        <!-- Pantalla del chat -->
+        <div id="chat-screen" style="display: none;">
+            <div id="chat-header">
+                <div>
+                    <strong id="room-display">Sala</strong>
+                    <span style="font-size: 0.8rem; opacity: 0.7;" id="room-code-display">Código: ---</span>
+                </div>
+                <div>
+                    <span id="user-display">Usuario</span>
+                    <button id="leave-btn" style="margin-left: 10px;">Salir</button>
+                </div>
+            </div>
+            
+            <div id="messages-container">
+                <!-- Aquí aparecerán los mensajes -->
+            </div>
+            
+            <div id="input-area">
+                <input type="text" id="message-input" placeholder="Escribe tu mensaje...">
+                <button id="send-btn">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
