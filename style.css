@@ -1,0 +1,521 @@
+/* ============================================
+   PlainMessage — Material You · Verde Olivo
+   Tema claro/oscuro automático
+   ============================================ */
+
+/* --- Variables para TEMA CLARO (por defecto) --- */
+:root {
+    /* Colores principales (verde olivo) */
+    --primary: #556B2F;
+    --primary-container: #D4E8B8;
+    --on-primary: #FFFFFF;
+    --on-primary-container: #1A2408;
+    --primary-hover: #6B8238;
+
+    /* Superficies */
+    --background: #F8FAF3;
+    --surface: #FFFFFF;
+    --surface-variant: #E8EDDF;
+    --surface-container: #F0F4E8;
+    --on-surface: #1A1C16;
+    --on-surface-variant: #44483D;
+
+    /* Mensajes */
+    --message-other: #E8EDDF;
+    --message-own: #556B2F;
+    --message-own-text: #FFFFFF;
+
+    /* Bordes y sombras */
+    --outline: #C5C9B8;
+    --shadow: rgba(85, 107, 47, 0.15);
+    --shadow-strong: rgba(85, 107, 47, 0.25);
+
+    /* Estados */
+    --error: #B3261E;
+    --success: #4CAF50;
+}
+
+/* --- Variables para TEMA OSCURO (automático) --- */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #B8D48A;
+        --primary-container: #3A4A1E;
+        --on-primary: #1A2408;
+        --on-primary-container: #D4E8B8;
+        --primary-hover: #C9E09E;
+
+        --background: #121410;
+        --surface: #1C1F18;
+        --surface-variant: #2A2E24;
+        --surface-container: #242820;
+        --on-surface: #E2E3DB;
+        --on-surface-variant: #C5C9B8;
+
+        --message-other: #2A2E24;
+        --message-own: #556B2F;
+        --message-own-text: #FFFFFF;
+
+        --outline: #44483D;
+        --shadow: rgba(0, 0, 0, 0.4);
+        --shadow-strong: rgba(0, 0, 0, 0.6);
+
+        --error: #F2B8B5;
+        --success: #81C784;
+    }
+}
+
+/* --- Reset --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- Cuerpo --- */
+body {
+    font-family: 'Google Sans', 'Segoe UI', Roboto, -apple-system, sans-serif;
+    background: var(--background);
+    color: var(--on-surface);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 16px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* --- Contenedor principal --- */
+#app {
+    width: 100%;
+    max-width: 640px;
+    background: var(--surface);
+    border-radius: 28px;
+    box-shadow: 0 4px 20px var(--shadow), 0 1px 3px var(--shadow);
+    overflow: hidden;
+    padding: 24px;
+    height: 90vh;
+    max-height: 820px;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ============================================
+   PANTALLA DE INICIO
+   ============================================ */
+#home-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+    overflow-y: auto;
+}
+
+/* --- Marca PlainMessage --- */
+.brand {
+    margin-bottom: 32px;
+}
+
+.brand-icon {
+    font-size: 3.5rem;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 8px var(--shadow));
+}
+
+.brand h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.tagline {
+    font-size: 1rem;
+    color: var(--on-surface-variant);
+    font-weight: 400;
+    letter-spacing: 0.2px;
+}
+
+/* ============================================
+   TARJETAS DE OPCIONES
+   ============================================ */
+.home-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 420px;
+}
+
+.option-card {
+    background: var(--surface-container);
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid var(--outline);
+    text-align: left;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+.option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow);
+}
+
+.option-card h2 {
+    margin: 0 0 4px 0;
+    color: var(--primary);
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+.option-card > p {
+    font-size: 0.85rem;
+    color: var(--on-surface-variant);
+    margin-bottom: 16px;
+}
+
+/* --- Inputs Material You --- */
+.option-card input {
+    width: 100%;
+    padding: 14px 18px;
+    margin: 6px 0;
+    border: 1.5px solid var(--outline);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--on-surface);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.3s ease;
+}
+
+.option-card input::placeholder {
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+}
+
+.option-card input:focus {
+    border-color: var(--primary);
+    border-width: 2px;
+    padding: 13.5px 17.5px;
+}
+
+/* --- Botones Material You --- */
+.option-card button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 20px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.option-card button:hover:not(:disabled) {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 12px var(--shadow-strong);
+}
+
+.option-card button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.option-card button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   MENSAJES DE ERROR / ÉXITO
+   ============================================ */
+#error-message {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    min-height: 24px;
+    display: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* ============================================
+   PANTALLA DEL CHAT
+   ============================================ */
+#chat-screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* --- Header del chat --- */
+#chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px 16px 4px;
+    border-bottom: 1px solid var(--outline);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.header-info strong {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--on-surface);
+}
+
+#room-code-display {
+    font-family: 'Roboto Mono', monospace;
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#user-display {
+    font-size: 0.85rem;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+}
+
+#leave-btn {
+    padding: 8px 18px;
+    border: 1.5px solid var(--outline);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--on-surface);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#leave-btn:hover {
+    background: var(--surface-variant);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ============================================
+   CONTENEDOR DE MENSAJES
+   ============================================ */
+#messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* --- Cada mensaje --- */
+.message {
+    background: var(--message-other);
+    padding: 10px 16px;
+    border-radius: 20px;
+    border-bottom-left-radius: 6px;
+    max-width: 78%;
+    align-self: flex-start;
+    word-wrap: break-word;
+    animation: fadeIn 0.25s ease;
+    transition: background 0.3s ease;
+}
+
+.message .username {
+    font-weight: 500;
+    color: var(--primary);
+    font-size: 0.78rem;
+    margin-bottom: 2px;
+}
+
+.message .text {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--on-surface);
+}
+
+.message .time {
+    font-size: 0.65rem;
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+}
+
+/* --- Mis mensajes --- */
+.message.own {
+    align-self: flex-end;
+    background: var(--message-own);
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 6px;
+}
+
+.message.own .username {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.message.own .text {
+    color: var(--message-own-text);
+}
+
+.message.own .time {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* --- Animación --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   ÁREA DE ESCRITURA
+   ============================================ */
+#input-area {
+    display: flex;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--outline);
+}
+
+#input-area input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 24px;
+    border: 1.5px solid var(--outline);
+    background: var(--surface-container);
+    color: var(--on-surface);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.3s ease;
+}
+
+#input-area input::placeholder {
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+}
+
+#input-area input:focus {
+    border-color: var(--primary);
+    border-width: 2px;
+    padding: 13.5px 19.5px;
+}
+
+#input-area button {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 24px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+#input-area button:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 12px var(--shadow-strong);
+}
+
+#input-area button:active {
+    transform: scale(0.97);
+}
+
+/* ============================================
+   SCROLL PERSONALIZADO
+   ============================================ */
+#messages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#messages-container::-webkit-scrollbar-thumb {
+    background: var(--outline);
+    border-radius: 10px;
+}
+
+#messages-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* ============================================
+   RESPONSIVE (MÓVILES)
+   ============================================ */
+@media (max-width: 500px) {
+    body {
+        padding: 0;
+    }
+
+    #app {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+        padding: 16px;
+    }
+
+    .brand-icon {
+        font-size: 3rem;
+    }
+
+    .brand h1 {
+        font-size: 2rem;
+    }
+
+    .home-options {
+        max-width: 100%;
+    }
+
+    .option-card {
+        padding: 20px;
+    }
+
+    .message {
+        max-width: 88%;
+    }
+
+    #chat-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .header-user {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    #input-area button {
+        padding: 14px 20px;
+    }
+}
