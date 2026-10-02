@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlainMessage</title>
+    <title>PlainMessage - Chat simple</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
-        <!-- Pantalla de inicio -->
+        <!-- Pantalla de inicio donde el usuario crea o se une a una sala -->
         <div id="home-screen">
             <div class="brand">
-                <div class="brand-icon">💬</div>
+                <div class="brand-icon">PM</div>
                 <h1>PlainMessage</h1>
                 <p class="tagline">Conversar nunca fue tan fácil</p>
             </div>
             
             <div class="home-options">
-                <!-- Crear sala -->
+                <!-- Formulario para crear una sala nueva -->
                 <div class="option-card">
-                    <h2>✨ Crear Sala</h2>
+                    <h2>Crear Sala</h2>
                     <p>Inicia un nuevo chat y comparte el código</p>
                     <input type="text" id="create-room-name" placeholder="Nombre de la sala" maxlength="30">
                     <input type="text" id="create-username" placeholder="Tu nombre de usuario" maxlength="15">
                     <button id="create-room-btn">Crear Sala</button>
                 </div>
 
-                <!-- Unirse a sala -->
+                <!-- Formulario para unirse a una sala existente -->
                 <div class="option-card">
-                    <h2>🔑 Unirse a Sala</h2>
+                    <h2>Unirse a Sala</h2>
                     <p>Ingresa el código de una sala existente</p>
                     <input type="text" id="join-room-code" placeholder="Código (ej: ABC123)" maxlength="6">
                     <input type="text" id="join-username" placeholder="Tu nombre de usuario" maxlength="15">
@@ -39,7 +39,7 @@
             <div id="error-message"></div>
         </div>
 
-        <!-- Pantalla del chat -->
+        <!-- Pantalla del chat, oculta al inicio -->
         <div id="chat-screen" style="display: none;">
             <div id="chat-header">
                 <div class="header-info">
