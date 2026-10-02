@@ -1,19 +1,43 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        // Si separas el frontend, cambia esto por tu dominio real
+        origin: process.env.CORS_ORIGIN || '*',
+        methods: ['GET', 'POST']
+    }
+});
 
-// Servir los archivos estáticos del proyecto
+// Clave secreta para firmar tokens. En producción define JWT_SECRET
+// en las variables de entorno de Render. Si no, se genera una aleatoria
+// al arrancar (los tokens se invalidan al reiniciar el servicio, lo
+// cual es aceptable porque los datos también se pierden al reiniciar).
+const JWT_SECRET = process.env.JWT_SECRET || require('crypto').randomBytes(32).toString('hex');
+const TOKEN_TTL = '2h';
+
+// Middleware
+app.use(express.json({ limit: '10kb' }));
 app.use(express.static('./'));
 
-// Base de datos en memoria para las salas
+// Rate limit para las rutas de API: máximo 20 peticiones por minuto por IP
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Demasiadas peticiones, espera un momento' }
+});
+
+// Base de datos en memoria
 const rooms = {};
 
-// Genera un código aleatorio de 6 caracteres para las salas
+// Genera un código de sala de 6 caracteres
 function generateRoomCode() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -23,139 +47,179 @@ function generateRoomCode() {
     return code;
 }
 
+// Sanitiza texto: elimina etiquetas y limita longitud
+function sanitize(text, maxLen) {
+    if (typeof text !== 'string') return '';
+    return text
+        .replace(/[<>]/g, '')
+        .trim()
+        .slice(0, maxLen);
+}
+
+// Crea un token firmado para un usuario y sala concreta
+function createToken(username, roomCode) {
+    return jwt.sign(
+        { username, roomCode },
+        JWT_SECRET,
+        { expiresIn: TOKEN_TTL }
+    );
+}
+
+// Middleware de autenticación para Socket.IO
+io.use((socket, next) => {
+    const token = socket.handshake.auth && socket.handshake.auth.token;
+    if (!token) {
+        return next(new Error('Token requerido'));
+    }
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        socket.user = payload;
+        next();
+    } catch (err) {
+        next(new Error('Token inválido o expirado'));
+    }
+});
+
+// API: crear sala
+app.post('/api/create-room', apiLimiter, (req, res) => {
+    const roomName = sanitize(req.body.roomName, 30);
+    const username = sanitize(req.body.username, 15);
+
+    if (!roomName || !username) {
+        return res.json({ success: false, error: 'Faltan datos' });
+    }
+
+    let roomCode;
+    do {
+        roomCode = generateRoomCode();
+    } while (rooms[roomCode]);
+
+    rooms[roomCode] = {
+        name: roomName,
+        creator: username,
+        users: new Set(),
+        messages: []
+    };
+
+    const token = createToken(username, roomCode);
+    console.log(`Sala creada: ${roomCode} - ${roomName}`);
+
+    res.json({
+        success: true,
+        token,
+        roomCode,
+        roomName,
+        username
+    });
+});
+
+// API: unirse a sala
+app.post('/api/join-room', apiLimiter, (req, res) => {
+    const roomCode = sanitize(req.body.roomCode, 6).toUpperCase();
+    const username = sanitize(req.body.username, 15);
+
+    if (!roomCode || !username) {
+        return res.json({ success: false, error: 'Faltan datos' });
+    }
+
+    const room = rooms[roomCode];
+    if (!room) {
+        return res.json({ success: false, error: 'Sala no encontrada' });
+    }
+
+    const token = createToken(username, roomCode);
+
+    res.json({
+        success: true,
+        token,
+        roomName: room.name,
+        username,
+        messages: room.messages
+    });
+});
+
+// Conexión Socket.IO ya autenticada
 io.on('connection', (socket) => {
-    console.log('Usuario conectado:', socket.id);
-    
-    let currentRoom = null;
-    let username = null;
+    const { username, roomCode } = socket.user;
+    console.log(`Usuario conectado: ${username} en ${roomCode}`);
 
-    // Crear una sala nueva
-    socket.on('create-room', (data, callback) => {
-        const { roomName, username: user } = data;
-        
-        if (!roomName || !user) {
-            callback({ success: false, error: 'Faltan datos' });
-            return;
-        }
+    const room = rooms[roomCode];
+    if (!room) {
+        socket.emit('connect_error', new Error('La sala ya no existe'));
+        socket.disconnect(true);
+        return;
+    }
 
-        let roomCode;
-        do {
-            roomCode = generateRoomCode();
-        } while (rooms[roomCode]);
+    // Unir al socket a la sala y registrar al usuario
+    socket.join(roomCode);
+    room.users.add(username);
 
-        rooms[roomCode] = {
-            name: roomName,
-            creator: user,
-            users: [],
-            messages: []
-        };
-
-        username = user;
-        currentRoom = roomCode;
-        socket.join(roomCode);
-        rooms[roomCode].users.push(username);
-
-        console.log(`Sala creada: ${roomCode} - ${roomName}`);
-
-        callback({ 
-            success: true, 
-            roomCode: roomCode,
-            roomName: roomName
-        });
+    // Avisar a los demás
+    socket.to(roomCode).emit('user-joined', {
+        username,
+        text: `${username} se ha unido a la sala`
     });
 
-    // Unirse a una sala existente
-    socket.on('join-room', (data, callback) => {
-        const { roomCode, username: user } = data;
-
-        if (!roomCode || !user) {
-            callback({ success: false, error: 'Faltan datos' });
-            return;
-        }
-
-        const room = rooms[roomCode];
-        if (!room) {
-            callback({ success: false, error: 'Sala no encontrada' });
-            return;
-        }
-
-        username = user;
-        currentRoom = roomCode;
-        socket.join(roomCode);
-        room.users.push(username);
-
-        callback({ 
-            success: true, 
-            roomName: room.name,
-            messages: room.messages
-        });
-
-        // Avisar a los demás que alguien entró
-        socket.to(roomCode).emit('user-joined', {
-            username: user,
-            text: `${user} se ha unido a la sala`
-        });
-
-        console.log(`${user} se unió a ${roomCode}`);
-    });
-
-    // Recibir y reenviar un mensaje
+    // Recibir mensaje
     socket.on('send-message', (data) => {
-        if (!currentRoom || !username) return;
+        const text = sanitize(data && data.text, 1000);
+        if (!text) return;
 
-        const room = rooms[currentRoom];
-        if (!room) return;
+        // Revalidamos que la sala siga existiendo
+        const currentRoom = rooms[roomCode];
+        if (!currentRoom) return;
 
         const message = {
-            username: username,
-            text: data.text,
+            username,
+            text,
             time: Date.now()
         };
 
-        room.messages.push(message);
-        io.to(currentRoom).emit('message', message);
+        currentRoom.messages.push(message);
+        // Limitar el historial a 200 mensajes por sala
+        if (currentRoom.messages.length > 200) {
+            currentRoom.messages.shift();
+        }
+
+        io.to(roomCode).emit('message', message);
     });
 
     // Salir de la sala
     socket.on('leave-room', () => {
-        if (currentRoom && username) {
-            const room = rooms[currentRoom];
-            if (room) {
-                room.users = room.users.filter(u => u !== username);
-                socket.to(currentRoom).emit('user-left', {
-                    username: username,
-                    text: `${username} ha abandonado la sala`
-                });
-
-                // Si la sala queda vacía, se elimina
-                if (room.users.length === 0) {
-                    delete rooms[currentRoom];
-                    console.log(`Sala ${currentRoom} eliminada`);
-                }
-            }
-            socket.leave(currentRoom);
-            currentRoom = null;
-            username = null;
-        }
+        handleLeave(socket, username, roomCode);
     });
 
-    // Manejar desconexión
+    // Desconexión
     socket.on('disconnect', () => {
-        if (currentRoom && username) {
-            const room = rooms[currentRoom];
-            if (room) {
-                room.users = room.users.filter(u => u !== username);
-                if (room.users.length === 0) {
-                    delete rooms[currentRoom];
-                }
-            }
-        }
-        console.log('Usuario desconectado:', socket.id);
+        console.log(`Usuario desconectado: ${username}`);
+        handleLeave(socket, username, roomCode, true);
     });
 });
 
-const PORT = 3000;
+// Lógica compartida de salida
+function handleLeave(socket, username, roomCode, isDisconnect = false) {
+    const room = rooms[roomCode];
+    if (!room) return;
+
+    room.users.delete(username);
+
+    if (!isDisconnect) {
+        socket.to(roomCode).emit('user-left', {
+            username,
+            text: `${username} ha abandonado la sala`
+        });
+        socket.leave(roomCode);
+    }
+
+    // Si ya no queda nadie, eliminar la sala para no acumular datos
+    if (room.users.size === 0) {
+        delete rooms[roomCode];
+        console.log(`Sala ${roomCode} eliminada`);
+    }
+}
+
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-    console.log('Comparte este enlace con tus amigos');
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+    console.log('Configura JWT_SECRET en producción para que los tokens persistan entre reinicios');
 });

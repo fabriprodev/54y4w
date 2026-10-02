@@ -5,14 +5,12 @@
 
 /* Variables para el tema claro (por defecto) */
 :root {
-    /* Colores principales */
     --primary: #556B2F;
     --primary-container: #D4E8B8;
     --on-primary: #FFFFFF;
     --on-primary-container: #1A2408;
     --primary-hover: #6B8238;
 
-    /* Superficies */
     --background: #F8FAF3;
     --surface: #FFFFFF;
     --surface-variant: #E8EDDF;
@@ -20,22 +18,19 @@
     --on-surface: #1A1C16;
     --on-surface-variant: #44483D;
 
-    /* Mensajes */
     --message-other: #E8EDDF;
     --message-own: #556B2F;
     --message-own-text: #FFFFFF;
 
-    /* Bordes y sombras */
     --outline: #C5C9B8;
     --shadow: rgba(85, 107, 47, 0.15);
     --shadow-strong: rgba(85, 107, 47, 0.25);
 
-    /* Estados */
     --error: #B3261E;
     --success: #4CAF50;
 }
 
-/* Variables para el tema oscuro (se activa según el sistema) */
+/* Variables para el tema oscuro */
 @media (prefers-color-scheme: dark) {
     :root {
         --primary: #B8D48A;
@@ -84,7 +79,6 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Contenedor principal */
 #app {
     width: 100%;
     max-width: 640px;
@@ -178,7 +172,6 @@ body {
     margin-bottom: 16px;
 }
 
-/* Inputs */
 .option-card input {
     width: 100%;
     padding: 14px 18px;
@@ -204,7 +197,6 @@ body {
     padding: 13.5px 17.5px;
 }
 
-/* Botones */
 .option-card button {
     width: 100%;
     padding: 14px;
@@ -359,7 +351,6 @@ body {
     text-align: right;
 }
 
-/* Mensajes propios */
 .message.own {
     align-self: flex-end;
     background: var(--message-own);
