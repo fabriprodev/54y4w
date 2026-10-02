@@ -1,17 +1,17 @@
-// --- CONEXIÓN A RENDER ---
+/// Conexión con el servidor de Socket.IO
 const socket = io();
 
-console.log('🚀 PlainMessage cargado');
+console.log('PlainMessage cargado');
 
 socket.on('connect', () => {
-    console.log('✅ Conectado al servidor');
+    console.log('Conectado al servidor');
 });
 
 socket.on('connect_error', (error) => {
-    console.error('❌ Error de conexión:', error);
+    console.error('Error de conexión:', error);
 });
 
-// --- ELEMENTOS DEL DOM ---
+// Referencias a los elementos del DOM
 const homeScreen = document.getElementById('home-screen');
 const chatScreen = document.getElementById('chat-screen');
 const createRoomName = document.getElementById('create-room-name');
@@ -29,11 +29,12 @@ const sendBtn = document.getElementById('send-btn');
 const leaveBtn = document.getElementById('leave-btn');
 const errorMessage = document.getElementById('error-message');
 
+// Variables de estado
 let currentUser = null;
 let currentRoom = null;
 let currentRoomCode = null;
 
-// --- RECIBIR MENSAJES ---
+// Escucha cuando llega un mensaje nuevo
 socket.on('message', (data) => {
     const div = document.createElement('div');
     div.classList.add('message');
@@ -44,6 +45,7 @@ socket.on('message', (data) => {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
+// Notificación cuando alguien entra a la sala
 socket.on('user-joined', (data) => {
     const div = document.createElement('div');
     div.classList.add('message');
@@ -52,6 +54,7 @@ socket.on('user-joined', (data) => {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
+// Notificación cuando alguien sale de la sala
 socket.on('user-left', (data) => {
     const div = document.createElement('div');
     div.classList.add('message');
@@ -60,13 +63,13 @@ socket.on('user-left', (data) => {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
-// --- CREAR SALA ---
+// Crear una sala nueva
 createRoomBtn.onclick = () => {
     const name = createRoomName.value.trim();
     const user = createUsername.value.trim();
     
     if (!name || !user) {
-        showError('⚠️ Completa todos los campos');
+        showError('Completa todos los campos');
         return;
     }
     
@@ -84,29 +87,29 @@ createRoomBtn.onclick = () => {
             
             homeScreen.style.display = 'none';
             chatScreen.style.display = 'flex';
-            roomDisplay.textContent = `📚 ${currentRoom}`;
+            roomDisplay.textContent = currentRoom;
             roomCodeDisplay.textContent = `Código: ${currentRoomCode}`;
-            userDisplay.textContent = `👤 ${currentUser}`;
+            userDisplay.textContent = currentUser;
             
             const div = document.createElement('div');
             div.classList.add('message');
-            div.innerHTML = `<div class="username">Sistema</div><div class="text">🏠 Sala "${currentRoom}" creada. Código: ${currentRoomCode}</div>`;
+            div.innerHTML = `<div class="username">Sistema</div><div class="text">Sala "${currentRoom}" creada. Código: ${currentRoomCode}</div>`;
             messagesContainer.appendChild(div);
             
-            showSuccess('✅ Sala creada correctamente');
+            showSuccess('Sala creada correctamente');
         } else {
-            showError('❌ ' + res.error);
+            showError(res.error);
         }
     });
 };
 
-// --- UNIRSE A SALA ---
+// Unirse a una sala existente
 joinRoomBtn.onclick = () => {
     const code = joinRoomCode.value.trim().toUpperCase();
     const user = joinUsername.value.trim();
     
     if (!code || !user) {
-        showError('⚠️ Completa todos los campos');
+        showError('Completa todos los campos');
         return;
     }
     
@@ -124,6 +127,7 @@ joinRoomBtn.onclick = () => {
             
             messagesContainer.innerHTML = '';
             
+            // Mostrar el historial de mensajes de la sala
             if (res.messages) {
                 res.messages.forEach(msg => {
                     const div = document.createElement('div');
@@ -137,18 +141,18 @@ joinRoomBtn.onclick = () => {
             
             homeScreen.style.display = 'none';
             chatScreen.style.display = 'flex';
-            roomDisplay.textContent = `📚 ${currentRoom}`;
+            roomDisplay.textContent = currentRoom;
             roomCodeDisplay.textContent = `Código: ${currentRoomCode}`;
-            userDisplay.textContent = `👤 ${currentUser}`;
+            userDisplay.textContent = currentUser;
             
-            showSuccess('✅ Te has unido a la sala');
+            showSuccess('Te has unido a la sala');
         } else {
-            showError('❌ ' + res.error);
+            showError(res.error);
         }
     });
 };
 
-// --- ENVIAR MENSAJE ---
+// Enviar un mensaje
 sendBtn.onclick = () => {
     const text = messageInput.value.trim();
     if (!text) return;
@@ -157,11 +161,12 @@ sendBtn.onclick = () => {
     messageInput.focus();
 };
 
+// Enviar con Enter
 messageInput.onkeypress = (e) => {
     if (e.key === 'Enter') sendBtn.click();
 };
 
-// --- SALIR ---
+// Salir de la sala
 leaveBtn.onclick = () => {
     socket.emit('leave-room');
     messagesContainer.innerHTML = '';
@@ -172,17 +177,18 @@ leaveBtn.onclick = () => {
     currentRoomCode = null;
 };
 
-// --- ENTER PARA CREAR/UNIRSE ---
+// Atajos de teclado para los formularios
 createRoomName.onkeypress = (e) => { if (e.key === 'Enter') createRoomBtn.click(); };
 createUsername.onkeypress = (e) => { if (e.key === 'Enter') createRoomBtn.click(); };
 joinRoomCode.onkeypress = (e) => { if (e.key === 'Enter') joinRoomBtn.click(); };
 joinUsername.onkeypress = (e) => { if (e.key === 'Enter') joinRoomBtn.click(); };
 
+// Convertir el código a mayúsculas automáticamente
 joinRoomCode.oninput = function() {
     this.value = this.value.toUpperCase();
 };
 
-// --- FUNCIONES DE MENSAJES (estilo Material You) ---
+// Funciones para mostrar mensajes de estado
 function showError(msg) {
     errorMessage.textContent = msg;
     errorMessage.style.color = 'var(--error)';
@@ -209,4 +215,4 @@ function showSuccess(msg) {
     }, 3000);
 }
 
-console.log('✅ PlainMessage listo');
+console.log('PlainMessage listo');

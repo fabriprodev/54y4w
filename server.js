@@ -7,13 +7,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Servir archivos estáticos (tu HTML, CSS, JS)
+// Servir los archivos estáticos del proyecto
 app.use(express.static('./'));
 
-// Base de datos en memoria
+// Base de datos en memoria para las salas
 const rooms = {};
 
-// Generar código de sala
+// Genera un código aleatorio de 6 caracteres para las salas
 function generateRoomCode() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -24,12 +24,12 @@ function generateRoomCode() {
 }
 
 io.on('connection', (socket) => {
-    console.log('🟢 Usuario conectado:', socket.id);
+    console.log('Usuario conectado:', socket.id);
     
     let currentRoom = null;
     let username = null;
 
-    // Crear sala
+    // Crear una sala nueva
     socket.on('create-room', (data, callback) => {
         const { roomName, username: user } = data;
         
@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
         socket.join(roomCode);
         rooms[roomCode].users.push(username);
 
-        console.log(`✅ Sala creada: ${roomCode} - ${roomName}`);
+        console.log(`Sala creada: ${roomCode} - ${roomName}`);
 
         callback({ 
             success: true, 
@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Unirse a sala
+    // Unirse a una sala existente
     socket.on('join-room', (data, callback) => {
         const { roomCode, username: user } = data;
 
@@ -90,15 +90,16 @@ io.on('connection', (socket) => {
             messages: room.messages
         });
 
+        // Avisar a los demás que alguien entró
         socket.to(roomCode).emit('user-joined', {
             username: user,
-            text: `👋 ${user} se ha unido a la sala`
+            text: `${user} se ha unido a la sala`
         });
 
-        console.log(`✅ ${user} se unió a ${roomCode}`);
+        console.log(`${user} se unió a ${roomCode}`);
     });
 
-    // Enviar mensaje
+    // Recibir y reenviar un mensaje
     socket.on('send-message', (data) => {
         if (!currentRoom || !username) return;
 
@@ -115,7 +116,7 @@ io.on('connection', (socket) => {
         io.to(currentRoom).emit('message', message);
     });
 
-    // Salir de sala
+    // Salir de la sala
     socket.on('leave-room', () => {
         if (currentRoom && username) {
             const room = rooms[currentRoom];
@@ -123,12 +124,13 @@ io.on('connection', (socket) => {
                 room.users = room.users.filter(u => u !== username);
                 socket.to(currentRoom).emit('user-left', {
                     username: username,
-                    text: `👋 ${username} ha abandonado la sala`
+                    text: `${username} ha abandonado la sala`
                 });
 
+                // Si la sala queda vacía, se elimina
                 if (room.users.length === 0) {
                     delete rooms[currentRoom];
-                    console.log(`🗑️ Sala ${currentRoom} eliminada`);
+                    console.log(`Sala ${currentRoom} eliminada`);
                 }
             }
             socket.leave(currentRoom);
@@ -137,7 +139,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Desconexión
+    // Manejar desconexión
     socket.on('disconnect', () => {
         if (currentRoom && username) {
             const room = rooms[currentRoom];
@@ -148,12 +150,12 @@ io.on('connection', (socket) => {
                 }
             }
         }
-        console.log('🔴 Usuario desconectado:', socket.id);
+        console.log('Usuario desconectado:', socket.id);
     });
 });
 
 const PORT = 3000;
 server.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-    console.log('📱 Comparte este enlace con tus amigos (usando Ngrok)');
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log('Comparte este enlace con tus amigos');
 });

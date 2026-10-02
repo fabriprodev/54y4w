@@ -1,11 +1,11 @@
 /* ============================================
-   PlainMessage — Material You · Verde Olivo
-   Tema claro/oscuro automático
+   PlainMessage - Estilos con temática verde olivo
+   Soporta tema claro y oscuro automáticamente
    ============================================ */
 
-/* --- Variables para TEMA CLARO (por defecto) --- */
+/* Variables para el tema claro (por defecto) */
 :root {
-    /* Colores principales (verde olivo) */
+    /* Colores principales */
     --primary: #556B2F;
     --primary-container: #D4E8B8;
     --on-primary: #FFFFFF;
@@ -35,7 +35,7 @@
     --success: #4CAF50;
 }
 
-/* --- Variables para TEMA OSCURO (automático) --- */
+/* Variables para el tema oscuro (se activa según el sistema) */
 @media (prefers-color-scheme: dark) {
     :root {
         --primary: #B8D48A;
@@ -64,14 +64,13 @@
     }
 }
 
-/* --- Reset --- */
+/* Reset básico */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* --- Cuerpo --- */
 body {
     font-family: 'Google Sans', 'Segoe UI', Roboto, -apple-system, sans-serif;
     background: var(--background);
@@ -85,7 +84,7 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* --- Contenedor principal --- */
+/* Contenedor principal */
 #app {
     width: 100%;
     max-width: 640px;
@@ -102,7 +101,7 @@ body {
 }
 
 /* ============================================
-   PANTALLA DE INICIO
+   Pantalla de inicio
    ============================================ */
 #home-screen {
     display: flex;
@@ -114,7 +113,6 @@ body {
     overflow-y: auto;
 }
 
-/* --- Marca PlainMessage --- */
 .brand {
     margin-bottom: 32px;
 }
@@ -123,6 +121,8 @@ body {
     font-size: 3.5rem;
     margin-bottom: 8px;
     filter: drop-shadow(0 4px 8px var(--shadow));
+    font-weight: 700;
+    color: var(--primary);
 }
 
 .brand h1 {
@@ -141,7 +141,7 @@ body {
 }
 
 /* ============================================
-   TARJETAS DE OPCIONES
+   Tarjetas de opciones
    ============================================ */
 .home-options {
     display: flex;
@@ -178,7 +178,7 @@ body {
     margin-bottom: 16px;
 }
 
-/* --- Inputs Material You --- */
+/* Inputs */
 .option-card input {
     width: 100%;
     padding: 14px 18px;
@@ -204,7 +204,7 @@ body {
     padding: 13.5px 17.5px;
 }
 
-/* --- Botones Material You --- */
+/* Botones */
 .option-card button {
     width: 100%;
     padding: 14px;
@@ -235,7 +235,7 @@ body {
 }
 
 /* ============================================
-   MENSAJES DE ERROR / ÉXITO
+   Mensajes de error y éxito
    ============================================ */
 #error-message {
     margin-top: 16px;
@@ -248,7 +248,7 @@ body {
 }
 
 /* ============================================
-   PANTALLA DEL CHAT
+   Pantalla del chat
    ============================================ */
 #chat-screen {
     display: none;
@@ -256,7 +256,6 @@ body {
     height: 100%;
 }
 
-/* --- Header del chat --- */
 #chat-header {
     display: flex;
     justify-content: space-between;
@@ -316,7 +315,7 @@ body {
 }
 
 /* ============================================
-   CONTENEDOR DE MENSAJES
+   Contenedor de mensajes
    ============================================ */
 #messages-container {
     flex: 1;
@@ -327,7 +326,6 @@ body {
     gap: 10px;
 }
 
-/* --- Cada mensaje --- */
 .message {
     background: var(--message-other);
     padding: 10px 16px;
@@ -361,7 +359,7 @@ body {
     text-align: right;
 }
 
-/* --- Mis mensajes --- */
+/* Mensajes propios */
 .message.own {
     align-self: flex-end;
     background: var(--message-own);
@@ -381,7 +379,6 @@ body {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* --- Animación --- */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -394,7 +391,7 @@ body {
 }
 
 /* ============================================
-   ÁREA DE ESCRITURA
+   Área de escritura
    ============================================ */
 #input-area {
     display: flex;
@@ -450,7 +447,7 @@ body {
 }
 
 /* ============================================
-   SCROLL PERSONALIZADO
+   Scroll personalizado
    ============================================ */
 #messages-container::-webkit-scrollbar {
     width: 8px;
@@ -470,7 +467,7 @@ body {
 }
 
 /* ============================================
-   RESPONSIVE (MÓVILES)
+   Responsive para móviles
    ============================================ */
 @media (max-width: 500px) {
     body {
